@@ -119,13 +119,11 @@ mod SwingLayer {
         run {
             f()
         } with handler Game {
-            def getInitialState(resume) = {
-                let tiles = shuffleUntilSolvable();
-                resume(tiles)
+            def getInitialTiles(resume) = {
+                resume(shuffleUntilSolvable())
             }
             def render(state, resume) = {
-                let correctIndices = PuzzleLogic.correctPositions(state);
-                reRenderPanel(frame, state, correctIndices, sender);
+                reRenderPanel(frame, state#tiles, state#correctPositions, sender);
                 resume()
             }
             def getInput(resume) = {

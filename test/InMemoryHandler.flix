@@ -9,7 +9,7 @@ mod InMemoryHandler {
             run {
                 f()
             } with handler Game {
-                def getInitialState(resume) = {
+                def getInitialTiles(resume) = {
                     resume(initialTiles)
                 }
                 def render(_state, resume) = {

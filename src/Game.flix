@@ -13,13 +13,16 @@ pub enum Direction with Eq {
     case Right
 }
 
+/// ゲーム状態のレコード型
+pub type alias GameState = { tiles = Vector[Int32], correctPositions = Vector[Int32] }
+
 /// ゲームUI操作の抽象エフェクト
 pub eff Game {
-    /// 初期状態を取得する
-    def getInitialState(): Vector[Int32]
+    /// 初期タイル配列を取得する
+    def getInitialTiles(): Vector[Int32]
 
     /// 現在の状態を表示する
-    def render(state: Vector[Int32]): Unit
+    def render(state: GameState): Unit
 
     /// ユーザ入力を取得する
     def getInput(): GameInput
@@ -31,28 +34,34 @@ pub eff Game {
 mod GameLoop {
     use Direction.{Up, Down, Left, Right}
 
+    /// GameState を生成するヘルパー
+    def makeState(tiles: Vector[Int32]): GameState =
+        { tiles = tiles, correctPositions = PuzzleLogic.correctPositions(tiles) }
+
     /// ゲームのメインループ（最終状態を返す）
-    pub def start(): Vector[Int32] \ Game =
-        let initial = Game.getInitialState();
-        if (PuzzleLogic.isCleared(initial))
+    pub def start(): GameState \ Game =
+        let tiles = Game.getInitialTiles();
+        let initial = makeState(tiles);
+        if (PuzzleLogic.isCleared(tiles))
             onCleared(initial)
         else
             runLoop(initial)
 
     /// メインループ
-    def runLoop(state: Vector[Int32]): Vector[Int32] \ Game =
+    def runLoop(state: GameState): GameState \ Game =
         Game.render(state);
         let input = Game.getInput();
         match input {
             case GameInput.NoInput => state
             case _ =>
                 (forM (
-                    index <- inputToIndex(input, state);
-                    newState <- PuzzleLogic.tryMove(state, index)
-                ) yield (
-                    if (PuzzleLogic.isCleared(newState)) onCleared(newState)
+                    index <- inputToIndex(input, state#tiles);
+                    newTiles <- PuzzleLogic.tryMove(state#tiles, index)
+                ) yield {
+                    let newState = makeState(newTiles);
+                    if (PuzzleLogic.isCleared(newTiles)) onCleared(newState)
                     else runLoop(newState)
-                ))
+                })
                 |> Option.getWithDefault(runLoop(state))
         }
 
@@ -76,7 +85,7 @@ mod GameLoop {
         emptyIndex + offset
 
     /// クリア処理して最終状態を返す
-    def onCleared(state: Vector[Int32]): Vector[Int32] \ Game =
+    def onCleared(state: GameState): GameState \ Game =
         Game.render(state);
         Game.onCleared();
         state

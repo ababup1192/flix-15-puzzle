@@ -49,10 +49,14 @@ mod TestPuzzleLogic {
         let unsolvable = Vector#{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 14, 0};
         Assert.assertFalse(PuzzleLogic.isSolvable(unsolvable))
 
-    /// isCleared のテスト - クリア判定
+    /// isCleared のテスト - クリア状態
     @Test
-    def testIsCleared(): Unit \ Assert =
-        Assert.assertTrue(PuzzleLogic.isCleared(PuzzleLogic.initialTiles()));
+    def testIsClearedTrue(): Unit \ Assert =
+        Assert.assertTrue(PuzzleLogic.isCleared(PuzzleLogic.initialTiles()))
+
+    /// isCleared のテスト - 未クリア状態
+    @Test
+    def testIsClearedFalse(): Unit \ Assert =
         let shuffled = Vector#{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 0, 15};
         Assert.assertFalse(PuzzleLogic.isCleared(shuffled))
 

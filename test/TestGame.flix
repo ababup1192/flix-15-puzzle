@@ -8,18 +8,18 @@ mod TestGame {
     @Test
     def testSingleMoveToWin(): Unit \ Assert =
         let inputs = 15 :: Nil;
-        let tiles = run {
+        let state = run {
             GameLoop.start()
         } with InMemoryHandler.withTest(initTiles(), inputs);
-        Assert.assertTrue(PuzzleLogic.isCleared(tiles))
+        Assert.assertTrue(PuzzleLogic.isCleared(state#tiles))
 
     /// 移動不可能なタイルをクリックしても状態が変わらないテスト
     @Test
     def testInvalidMoveNoChange(): Unit \ Assert =
         let inputs = 0 :: Nil;  // 0は移動不可
-        let tiles = run {
+        let state = run {
             GameLoop.start()
         } with InMemoryHandler.withTest(initTiles(), inputs);
-        Assert.assertEq(expected = initTiles(), tiles)
+        Assert.assertEq(expected = initTiles(), state#tiles)
 
 }
