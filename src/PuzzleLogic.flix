@@ -45,7 +45,7 @@ mod PuzzleLogic {
             not Vector.isEmpty(result)
 
     /// タイルを移動（空きマスと入れ替え）
-    pub def move(tiles: Vector[Int32], clickedIndex: Int32): Vector[Int32] =
+    pub def move(clickedIndex: Int32, tiles: Vector[Int32]): Vector[Int32] =
         let emptyIndex = findEmpty(tiles);
         if (not canMove(tiles, clickedIndex))
             tiles
@@ -54,13 +54,6 @@ mod PuzzleLogic {
             tiles
                 |> Vector.update(clickedIndex, 0)
                 |> Vector.update(emptyIndex, clickedTile)
-
-    /// 移動を試みる（移動できた場合のみ新状態を返す）
-    pub def tryMove(tiles: Vector[Int32], index: Int32): Option[Vector[Int32]] =
-        if (canMove(tiles, index))
-            Some(move(tiles, index))
-        else
-            None
 
     /// 初期配列を生成
     pub def initialTiles(): Vector[Int32] =

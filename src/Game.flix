@@ -54,15 +54,14 @@ mod GameLoop {
         match input {
             case GameInput.NoInput => state
             case _ =>
-                (forM (
-                    index <- inputToIndex(input, state#tiles);
-                    newTiles <- PuzzleLogic.tryMove(state#tiles, index)
-                ) yield {
-                    let newState = makeState(newTiles);
-                    if (PuzzleLogic.isCleared(newTiles)) onCleared(newState)
-                    else runLoop(newState)
-                })
-                |> Option.getWithDefault(runLoop(state))
+                match inputToIndex(input, state#tiles) {
+                    case None => runLoop(state)
+                    case Some(index) =>
+                        let newTiles = state#tiles |> PuzzleLogic.move(index);
+                        let newState = makeState(newTiles);
+                        if (PuzzleLogic.isCleared(newTiles)) onCleared(newState)
+                        else runLoop(newState)
+                }
         }
 
     /// 入力をタイルインデックスに変換

@@ -1,10 +1,10 @@
 mod InMemoryHandler {
     /// テスト用ハンドラ
     /// initialTiles: テスト用の初期盤面
-    /// inputList: クリック入力のシーケンス
-    pub def withTest(initialTiles: Vector[Int32], inputList: List[Int32], f: Unit -> a \ ef): a \ (ef - Game) =
+    /// inputList: 入力のシーケンス（Click, Arrow, NoInput）
+    pub def withTest(initialTiles: Vector[Int32], inputList: List[GameInput], f: Unit -> a \ ef): a \ (ef - Game) =
         region rc {
-            let inputsRef: Ref[List[Int32], rc] = Ref.fresh(rc, inputList);
+            let inputsRef: Ref[List[GameInput], rc] = Ref.fresh(rc, inputList);
 
             run {
                 f()
@@ -21,7 +21,7 @@ mod InMemoryHandler {
                         case Nil => resume(GameInput.NoInput)
                         case x :: xs => {
                             Ref.put(xs, inputsRef);
-                            resume(GameInput.Click(x))
+                            resume(x)
                         }
                     }
                 }
