@@ -2,7 +2,6 @@
 pub enum GameInput with Eq {
     case Click(Int32)    // タイルをクリック（インデックス）
     case Arrow(Direction) // 矢印キー
-    case NoInput         // 入力なし（テスト用終了シグナル）
 }
 
 /// 矢印キーの方向
@@ -42,34 +41,24 @@ mod GameLoop {
     pub def start(): GameState \ Game =
         let tiles = Game.getInitialTiles();
         let initial = makeState(tiles);
-        if (PuzzleLogic.isCleared(tiles))
-            onCleared(initial)
-        else
-            runLoop(initial)
+        runLoop(initial)
 
     /// メインループ
     def runLoop(state: GameState): GameState \ Game =
         Game.render(state);
         let input = Game.getInput();
-        match input {
-            case GameInput.NoInput => state
-            case _ =>
-                match inputToIndex(input, state#tiles) {
-                    case None => runLoop(state)
-                    case Some(index) =>
-                        let newTiles = state#tiles |> PuzzleLogic.move(index);
-                        let newState = makeState(newTiles);
-                        if (PuzzleLogic.isCleared(newTiles)) onCleared(newState)
-                        else runLoop(newState)
-                }
-        }
+        let index = inputToIndex(input, state#tiles);
+        let newTiles = state#tiles |> PuzzleLogic.move(index);
+        let newState = makeState(newTiles);
+
+        if (PuzzleLogic.isCleared(newTiles)) onCleared(newState)
+        else runLoop(newState)
 
     /// 入力をタイルインデックスに変換
-    def inputToIndex(input: GameInput, tiles: Vector[Int32]): Option[Int32] =
+    def inputToIndex(input: GameInput, tiles: Vector[Int32]): Int32 =
         match input {
-            case GameInput.Click(index) => Some(index)
-            case GameInput.Arrow(dir) => Some(arrowToIndex(dir, tiles))
-            case GameInput.NoInput => None
+            case GameInput.Click(index) => index
+            case GameInput.Arrow(dir) => arrowToIndex(dir, tiles)
         }
 
     /// 矢印キーを移動するタイルのインデックスに変換
