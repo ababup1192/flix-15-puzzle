@@ -55,6 +55,13 @@ mod PuzzleLogic {
                 |> Vector.update(clickedIndex, 0)
                 |> Vector.update(emptyIndex, clickedTile)
 
+    /// 移動を試みる（移動できた場合のみ新状態を返す）
+    pub def tryMove(tiles: Vector[Int32], index: Int32): Option[Vector[Int32]] =
+        if (canMove(tiles, index))
+            Some(move(tiles, index))
+        else
+            None
+
     /// 初期配列を生成
     pub def initialTiles(): Vector[Int32] =
         Vector#{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0}

@@ -48,7 +48,7 @@ mod GameLoop {
             case _ =>
                 (forM (
                     index <- inputToIndex(input, state);
-                    newState <- tryMove(state, index)
+                    newState <- PuzzleLogic.tryMove(state, index)
                 ) yield (
                     if (PuzzleLogic.isCleared(newState)) onCleared(newState)
                     else runLoop(newState)
@@ -74,13 +74,6 @@ mod GameLoop {
             case Up    => 4
         };
         emptyIndex + offset
-
-    /// 移動を試みる（移動できた場合のみ新状態を返す）
-    def tryMove(tiles: Vector[Int32], index: Int32): Option[Vector[Int32]] =
-        if (PuzzleLogic.canMove(tiles, index))
-            Some(PuzzleLogic.move(tiles, index))
-        else
-            None
 
     /// クリア処理して最終状態を返す
     def onCleared(state: Vector[Int32]): Vector[Int32] \ Game =
