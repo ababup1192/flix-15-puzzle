@@ -4,7 +4,6 @@ Flix で実装した 15 パズルゲーム。Swing GUI + Flix のエフェクト
 
 ## 必要環境
 
-- JDK 21
 - devbox（推奨）
 
 ## 実行方法
