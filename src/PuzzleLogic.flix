@@ -69,18 +69,14 @@ mod PuzzleLogic {
 
     /// 転倒数を計算（0を除く）
     pub def countInversions(tiles: Vector[Int32]): Int32 =
-        let filtered = Vector.filter(t -> t != 0, tiles);
-        let len = Vector.length(filtered);
-        Vector.range(0, len) |> Vector.foldLeft((acc, i) -> {
-            let vi = Vector.get(i, filtered);
-            Vector.range(i + 1, len) |> Vector.foldLeft((acc2, j) -> {
-                let vj = Vector.get(j, filtered);
-                if (vi > vj)
-                    acc2 + 1
-                else
-                    acc2
-            }, acc)
-        }, 0)
+        let filtered = Vector.filter(t -> t != 0, tiles) |> Vector.toList;
+        def countFrom(xs: List[Int32]): Int32 = match xs {
+            case Nil => 0
+            case v :: rest =>
+                let inversions = List.count(x -> v > x, rest);
+                inversions + countFrom(rest)
+        };
+        countFrom(filtered)
 
     /// 空きマスの行（下から数えて 1-4）
     pub def emptyRowFromBottom(tiles: Vector[Int32]): Int32 =
