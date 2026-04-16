@@ -116,7 +116,7 @@ mod SwingLayer {
         Shuffle.handle(loop)()
 
     /// Swingハンドラを返す関数（run { } with SwingHandler.withSwing 形式で使用）
-    pub def withSwing(f: Unit -> a \ ef): a \ (ef - Game.Game) + IO + Chan + NonDet =
+    pub def withSwing(f: Unit -> Unit \ ef): Unit \ (ef - Game.Game) + IO + Chan + NonDet =
         let (sender, receiver): (Sender[Game.GameInput], Receiver[Game.GameInput]) = Channel.buffered(1);
         let frame = initUI(sender);
         run {
