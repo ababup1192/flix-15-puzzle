@@ -1,26 +1,41 @@
 mod InMemoryHandler {
-    /// テスト用ハンドラ
+    /// テスト用ハンドラ（単一盤面）
     /// initialTiles: テスト用の初期盤面
     /// inputList: 入力のシーケンス（Click, Arrow, NoInput）
-    pub def withTest(initialTiles: Vector[Int32], inputList: List[GameInput], f: Unit -> GameState \ ef): GameState \ (ef - Game) =
+    pub def withTest(initialTiles: Vector[Int32], inputList: List[Game.GameInput], f: Unit -> Game.GameState \ ef): Game.GameState \ (ef - Game.Game) =
+        withTestMultiBoards(initialTiles :: Nil, inputList, f)
+
+    /// テスト用ハンドラ（複数盤面対応 - 再シャッフルテスト用）
+    /// boardsList: 盤面のリスト（getInitialTilesが呼ばれるたびに次の盤面を返す）
+    /// inputList: 入力のシーケンス
+    pub def withTestMultiBoards(boardsList: List[Vector[Int32]], inputList: List[Game.GameInput], f: Unit -> Game.GameState \ ef): Game.GameState \ (ef - Game.Game) =
         region rc {
-            let inputsRef: Ref[List[GameInput], rc] = Ref.fresh(rc, inputList);
-            let stateRef: Ref[GameState, rc] = Ref.fresh(rc, { tiles = initialTiles, correctPositions = PuzzleLogic.correctPositions(initialTiles) });
+            let boardsRef: Ref[List[Vector[Int32]], rc] = Ref.fresh(rc, boardsList);
+            let inputsRef: Ref[List[Game.GameInput], rc] = Ref.fresh(rc, inputList);
+            let defaultTiles = List.head(boardsList) |> Option.getWithDefault(Vector#{});
+            let stateRef: Ref[Game.GameState, rc] = Ref.fresh(rc, { tiles = defaultTiles, correctPositions = PuzzleLogic.correctPositions(defaultTiles) });
 
             run {
                 f()
-            } with handler Game {
+            } with handler Game.Game {
                 def getInitialTiles(resume) = {
-                    resume(initialTiles)
+                    let boards = Ref.get(boardsRef);
+                    match boards {
+                        case Nil => resume(defaultTiles)
+                        case b :: bs => {
+                            Ref.put(bs, boardsRef);
+                            resume(b)
+                        }
+                    }
                 }
                 def render(state, resume) = {
-                    Ref.put(state, stateRef); 
+                    Ref.put(state, stateRef);
                     resume()
                 }
                 def getInput(resume) = {
                     let inputs = Ref.get(inputsRef);
                     match inputs {
-                        case Nil => Ref.get(stateRef)  // 保存した状態を返す
+                        case Nil => Ref.get(stateRef)  
                         case x :: xs => {
                             Ref.put(xs, inputsRef);
                             resume(x)

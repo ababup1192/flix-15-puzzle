@@ -3,7 +3,7 @@ def main(): Unit \ IO + Chan + NonDet =
     let (_, receiver) = Channel.buffered(1);
 
     discard run {
-        GameLoop.start()
+        Game.restartGame()
     } with SwingLayer.withSwing;
 
     // チャンネルで待機してアプリを起動し続ける

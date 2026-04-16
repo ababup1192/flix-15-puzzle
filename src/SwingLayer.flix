@@ -22,17 +22,17 @@ mod SwingLayer {
     def wrongColor(): Color \ IO = new Color(80, 160, 200)      // 水色
 
     /// キーコードを Direction に変換
-    def keyCodeToDirection(keyCode: Int32): Option[Direction] =
+    def keyCodeToDirection(keyCode: Int32): Option[Game.Direction] =
         match keyCode {
-            case 37 => Some(Direction.Left)   // VK_LEFT
-            case 38 => Some(Direction.Up)     // VK_UP
-            case 39 => Some(Direction.Right)  // VK_RIGHT
-            case 40 => Some(Direction.Down)   // VK_DOWN
+            case 37 => Some(Game.Direction.Left)   // VK_LEFT
+            case 38 => Some(Game.Direction.Up)     // VK_UP
+            case 39 => Some(Game.Direction.Right)  // VK_RIGHT
+            case 40 => Some(Game.Direction.Down)   // VK_DOWN
             case _ => None
         }
 
     /// ボタンを作成
-    def createButton(index: Int32, tile: Int32, isCorrect: Bool, sender: Sender[GameInput]): JButton \ IO =
+    def createButton(index: Int32, tile: Int32, isCorrect: Bool, sender: Sender[Game.GameInput]): JButton \ IO =
         let btn = new JButton("${tile}");
         btn.setFont(new Font("SansSerif", 1, 24));
         if (isCorrect)
@@ -41,13 +41,13 @@ mod SwingLayer {
             btn.setBackground(wrongColor());
         let listener: ActionListener = new ActionListener {
             def actionPerformed(_this: ActionListener, _e: ActionEvent): Unit \ Chan =
-                Channel.send(GameInput.Click(index), sender)
+                Channel.send(Game.GameInput.Click(index), sender)
         };
         btn.addActionListener(listener);
         btn
 
     /// パネルを再描画
-    def reRenderPanel(frame: JFrame, tiles: Vector[Int32], correctIndices: Vector[Int32], sender: Sender[GameInput]): Unit \ IO =
+    def reRenderPanel(frame: JFrame, tiles: Vector[Int32], correctIndices: Vector[Int32], sender: Sender[Game.GameInput]): Unit \ IO =
         let panel = getPanel(frame);
         panel.removeAll();
         Vector.forEachWithIndex((index, tile) -> {
@@ -64,7 +64,7 @@ mod SwingLayer {
         panel.repaint()
 
     /// Swing UIを初期化（キーボードリスナー付き）
-    def initUI(sender: Sender[GameInput]): JFrame \ IO =
+    def initUI(sender: Sender[Game.GameInput]): JFrame \ IO =
         discard FlatDarkLaf.setup();
         let frame = new JFrame("15 Puzzle");
         let panel = new JPanel();
@@ -77,7 +77,7 @@ mod SwingLayer {
             def keyPressed(_this: KeyListener, e: KeyEvent): Unit \ IO + Chan =
                 let keyCode = e.getKeyCode();
                 match keyCodeToDirection(keyCode) {
-                    case Some(dir) => Channel.send(GameInput.Arrow(dir), sender)
+                    case Some(dir) => Channel.send(Game.GameInput.Arrow(dir), sender)
                     case None => ()
                 }
             def keyReleased(_this: KeyListener, _e: KeyEvent): Unit = ()
@@ -116,12 +116,12 @@ mod SwingLayer {
         Shuffle.handle(loop)()
 
     /// Swingハンドラを返す関数（run { } with SwingHandler.withSwing 形式で使用）
-    pub def withSwing(f: Unit -> a \ ef): a \ (ef - Game) + IO + Chan + NonDet =
-        let (sender, receiver): (Sender[GameInput], Receiver[GameInput]) = Channel.buffered(1);
+    pub def withSwing(f: Unit -> a \ ef): a \ (ef - Game.Game) + IO + Chan + NonDet =
+        let (sender, receiver): (Sender[Game.GameInput], Receiver[Game.GameInput]) = Channel.buffered(1);
         let frame = initUI(sender);
         run {
             f()
-        } with handler Game {
+        } with handler Game.Game {
             def getInitialTiles(resume) = {
                 resume(shuffleUntilSolvable())
             }
