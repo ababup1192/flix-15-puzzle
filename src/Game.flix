@@ -23,7 +23,7 @@ mod Game {
         /// 初期タイル配列を取得する
         def getInitialTiles(): Vector[Int32]
 
-        /// 現在の状態を表示する
+        /// 現在の状態を描画する
         def render(state: GameState): Unit
 
         /// ユーザ入力を取得する
@@ -37,10 +37,12 @@ mod Game {
     def makeState(tiles: Vector[Int32]): GameState =
         { tiles = tiles, correctPositions = PuzzleLogic.correctPositions(tiles) }
 
+    /// エントリポイントで呼ばれる、ゲームループの呼び出し
     pub def restartGame(): GameState \ Game =
         runLoop(makeState(Game.getInitialTiles()))
 
     /// メインループ
+    @Tailrec
     def runLoop(state: GameState): GameState \ Game =
         Game.render(state);
         let input = Game.getInput();
