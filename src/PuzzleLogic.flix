@@ -14,30 +14,34 @@ mod PuzzleLogic {
 
     /// Datalogでタイルが移動可能か判定
     /// クリックしたタイルが空きマスに隣接している場合のみ移動可能
-    pub def canMove(tiles: Vector[Int32], clickedIndex: Int32): Bool =
+    pub def canMove(tiles: Vector[Int32], targetIndex: Int32): Bool =
         let emptyIndex = findEmpty(tiles);
         // 範囲外チェック
-        if (clickedIndex < 0 or clickedIndex > 15 or emptyIndex < 0)
+        if (targetIndex < 0 or targetIndex > 15 or emptyIndex < 0)
             false
         else
             // インデックスを (row, col) 座標に変換
-            let (clickedRow, clickedCol) = indexToPos(clickedIndex);
+            let (targetRow, targetCol) = indexToPos(targetIndex);
             let (emptyRow, emptyCol) = indexToPos(emptyIndex);
 
             // Datalog ファクト: クリック位置、空きマス位置、4方向の隣接セルを定義
+            //          [empty?]
+            // [empty?] [target] [empty?]
+            //          [empty?]
+            // いずれかが empty なら移動可能
             let facts = #{
-                ClickedPos(clickedRow, clickedCol).
+                TargetPos(targetRow, targetCol).
                 EmptyPos(emptyRow, emptyCol).
                 // クリック位置から見た上下左右の隣接セル
-                Adjacent(clickedRow, clickedCol, clickedRow, clickedCol - 1).  // 左
-                Adjacent(clickedRow, clickedCol, clickedRow, clickedCol + 1).  // 右
-                Adjacent(clickedRow, clickedCol, clickedRow - 1, clickedCol).  // 上
-                Adjacent(clickedRow, clickedCol, clickedRow + 1, clickedCol).  // 下
+                Adjacent(targetRow, targetCol, targetRow, targetCol - 1).  // 左
+                Adjacent(targetRow, targetCol, targetRow, targetCol + 1).  // 右
+                Adjacent(targetRow, targetCol, targetRow - 1, targetCol).  // 上
+                Adjacent(targetRow, targetCol, targetRow + 1, targetCol).  // 下
             };
 
             // Datalog ルール: クリック位置の隣接セルに空きマスがあれば CanMove
             let rules = #{
-                CanMove() :- ClickedPos(cr, cc), EmptyPos(er, ec), Adjacent(cr, cc, er, ec).
+                CanMove() :- TargetPos(cr, cc), EmptyPos(er, ec), Adjacent(cr, cc, er, ec).
             };
 
             // クエリ結果が空でなければ移動可能

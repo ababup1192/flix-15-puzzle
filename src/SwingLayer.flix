@@ -104,19 +104,19 @@ mod SwingLayer {
         let message: Object = checked_cast(msg);
         JOptionPane.showMessageDialog(parent, message)
 
-    /// シャッフルされた解ける盤面を生成（即クリア状態も弾く）
-    def shuffleUntilSolvable(): Vector[Int32] \ NonDet =
-        def loop() = {
-            let shuffled = Shuffle.permutation(16);
-            if (not PuzzleLogic.isSolvable(shuffled) or PuzzleLogic.isCleared(shuffled))
-                loop()
-            else
-                shuffled
-        };
-        Shuffle.handle(loop)()
+        /// シャッフルされた解ける盤面を生成（即クリア状態も弾く）
+        def shuffleUntilSolvable(): Vector[Int32] \ NonDet =
+            def loop(): Vector[Int32] \ Shuffle = {
+                let shuffled = Shuffle.permutation(16);
+                if (not PuzzleLogic.isSolvable(shuffled) or PuzzleLogic.isCleared(shuffled))
+                    loop()
+                else
+                    shuffled
+            };
+            Shuffle.handle(loop)()
 
     /// Swingハンドラを返す関数（run { } with SwingHandler.withSwing 形式で使用）
-    pub def withSwing(f: Unit -> Unit \ ef): Unit \ (ef - Game.Game) + IO + Chan + NonDet =
+    pub def withSwing(f: Unit -> a \ ef): a \ (ef - Game.Game) + IO + Chan + NonDet =
         let (sender, receiver): (Sender[Game.GameInput], Receiver[Game.GameInput]) = Channel.buffered(1);
         let frame = initUI(sender);
         run {
