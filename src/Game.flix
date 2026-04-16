@@ -44,7 +44,8 @@ mod Game {
     def runLoop(state: GameState): GameState \ Game =
         Game.render(state);
         let input = Game.getInput();
-        let newTiles = state#tiles |> PuzzleLogic.move(inputToIndex(input, state#tiles));
+        let tiles = state#tiles;
+        let newTiles = PuzzleLogic.move(inputToIndex(input, tiles), tiles);
         let newState = makeState(newTiles);
 
         if (PuzzleLogic.isCleared(newTiles)) {
