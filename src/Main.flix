@@ -7,4 +7,4 @@ def main(): Unit \ IO + Chan + NonDet =
     } with SwingLayer.withSwing;
 
     // チャンネルで待機してアプリを起動し続ける
-    discard Channel.recv(receiver)
+    Channel.recv(receiver)
