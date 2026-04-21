@@ -1,9 +1,9 @@
 mod Game {
     use Direction.{Up, Down, Left, Right}
 
-    /// ユーザー入力を表す Enum
+    /// ユーザー入力を表す。マウスのクリックとキーボードの矢印キーに対応。
     pub enum GameInput with Eq {
-        case Click(Int32)    // タイルをクリック（インデックス）
+        case Click(Int32)    // タイルをクリック
         case Arrow(Direction) // 矢印キー
     }
 
@@ -15,40 +15,25 @@ mod Game {
         case Right
     }
 
-    /// ゲーム状態のレコード型
-    pub type alias GameState = { tiles = Vector[Int32], correctPositions = Vector[Int32] }
+    pub type alias GameState = { tiles = Vector[Int32] }
 
-    /// ゲームUI操作の抽象エフェクト
     pub eff Game {
-        /// 初期タイル配列を取得する
         def getInitialTiles(): Vector[Int32]
-
-        /// 現在の状態を描画する
         def render(state: GameState): Unit
-
-        /// ユーザ入力を取得する
         def getInput(): GameInput
-
-        /// クリア時の処理
         def onCleared(): Unit
     }
 
-    /// GameState を生成するヘルパー
-    def makeState(tiles: Vector[Int32]): GameState =
-        { tiles = tiles, correctPositions = PuzzleLogic.correctPositions(tiles) }
-
-    /// エントリポイントで呼ばれる、ゲームループの呼び出し
     pub def restartGame(): GameState \ Game =
-        runLoop(makeState(Game.getInitialTiles()))
+        runLoop({tiles = Game.getInitialTiles()})
 
-    /// メインループ
     @Tailrec
     def runLoop(state: GameState): GameState \ Game =
         Game.render(state);
         let input = Game.getInput();
         let tiles = state#tiles;
         let newTiles = PuzzleLogic.move(inputToIndex(input, tiles), tiles);
-        let newState = makeState(newTiles);
+        let newState = {tiles = newTiles};
 
         if (PuzzleLogic.isCleared(newTiles)) {
             Game.render(newState);
@@ -58,14 +43,12 @@ mod Game {
             runLoop(newState)
         }
 
-    /// 入力をタイルインデックスに変換
     def inputToIndex(input: GameInput, tiles: Vector[Int32]): Int32 =
         match input {
             case GameInput.Click(index) => index
             case GameInput.Arrow(dir) => arrowToIndex(dir, tiles)
         }
 
-    /// 矢印キーを移動するタイルのインデックスに変換
     def arrowToIndex(dir: Direction, tiles: Vector[Int32]): Int32 =
         let emptyIndex = PuzzleLogic.findEmpty(tiles);
         let offset = match dir {

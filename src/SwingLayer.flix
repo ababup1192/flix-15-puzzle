@@ -47,7 +47,7 @@ mod SwingLayer {
         btn
 
     /// パネルを再描画
-    def reRenderPanel(frame: JFrame, tiles: Vector[Int32], correctIndices: Vector[Int32], sender: Sender[Game.GameInput]): Unit \ IO =
+    def reRenderPanel(frame: JFrame, tiles: Vector[Int32], sender: Sender[Game.GameInput]): Unit \ IO =
         let panel = getPanel(frame);
         panel.removeAll();
         Vector.forEachWithIndex((index, tile) -> {
@@ -55,7 +55,7 @@ mod SwingLayer {
                 let emptyLabel = new JLabel("");
                 discard panel.add(emptyLabel)
             } else {
-                let isCorrect = Vector.memberOf(index, correctIndices);
+                let isCorrect = Vector.memberOf(index, PuzzleLogic.correctPositions(tiles));
                 let btn = createButton(index, tile, isCorrect, sender);
                 discard panel.add(btn)
             }
@@ -126,7 +126,7 @@ mod SwingLayer {
                 resume(shuffleUntilSolvable())
             }
             def render(state, resume) = {
-                reRenderPanel(frame, state#tiles, state#correctPositions, sender);
+                reRenderPanel(frame, state#tiles, sender);
                 resume()
             }
             def getInput(resume) = {

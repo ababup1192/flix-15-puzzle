@@ -13,7 +13,7 @@ mod InMemoryHandler {
             let boardsRef: Ref[List[Vector[Int32]], rc] = Ref.fresh(rc, boardsList);
             let inputsRef: Ref[List[Game.GameInput], rc] = Ref.fresh(rc, inputList);
             let defaultTiles = List.head(boardsList) |> Option.getWithDefault(Vector#{});
-            let stateRef: Ref[Game.GameState, rc] = Ref.fresh(rc, { tiles = defaultTiles, correctPositions = PuzzleLogic.correctPositions(defaultTiles) });
+            let stateRef: Ref[Game.GameState, rc] = Ref.fresh(rc, { tiles = defaultTiles });
 
             run {
                 f()
